@@ -1,19 +1,23 @@
 package de.unistuttgart.fmi.osmfaprajava;
 
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.stereotype.Controller;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+@RestController
 public class Controllers {
 
+    private GroupRepository groupRepository;
+    @Autowired
+    public Controllers(GroupRepository groupRepository) {
+        this.groupRepository = groupRepository;
+    }
     @CrossOrigin
-    @MessageMapping("/update-location/{id}")
-    @SendTo("topic/test")
-    public String updateLocation(String message, @PathVariable String id) throws Exception {
-        Thread.sleep(1000);
-        return id;
+    @RequestMapping("create-group")
+    public MyGroup createGroup() {
+        MyGroup myGroup = new MyGroup();
+        groupRepository.save(myGroup);
+        return myGroup;
     }
 }

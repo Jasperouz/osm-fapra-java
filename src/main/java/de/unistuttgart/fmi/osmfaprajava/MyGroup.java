@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 @Entity
-public class Group {
+public class MyGroup {
     @Id
     @GeneratedValue
     private UUID id;
@@ -15,7 +15,7 @@ public class Group {
     private ArrayList<Member> members;
 
 
-    public Group() {
+    MyGroup() {
     }
 
     public ArrayList<Member> getMembers() {
