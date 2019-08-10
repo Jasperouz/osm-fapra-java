@@ -6,7 +6,7 @@ import javax.persistence.Id;
 import java.util.UUID;
 
 @Entity
-public class Member {
+public class User {
     @Id
     @GeneratedValue
     private UUID id;
@@ -14,7 +14,7 @@ public class Member {
     private double lon;
     private double lat;
 
-    public Member() {
+    public User() {
     }
 
     public UUID getId() {
