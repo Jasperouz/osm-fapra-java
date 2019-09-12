@@ -1,15 +1,25 @@
 package de.unistuttgart.fmi.osmfaprajava;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.*;
 import java.lang.reflect.Array;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
+
+import static org.springframework.boot.autoconfigure.http.HttpProperties.Encoding.DEFAULT_CHARSET;
 
 @RestController
 public class Controllers {
@@ -17,6 +27,7 @@ public class Controllers {
     private class UserID {
         public UUID userId;
     }
+    private static final Logger log = LoggerFactory.getLogger(Controllers.class);
 
     private GroupRepository groupRepository;
     private UserRepository userRepository;
@@ -93,5 +104,42 @@ public class Controllers {
         String nachricht = new String(buffer, 0, anzahlZeichen);
         clientSocket.close();
         return Long.parseLong(nachricht);
+    }
+
+    @CrossOrigin
+    @RequestMapping(value = "start-vote", method = RequestMethod.GET)
+    public ResponseEntity startVote(@RequestParam UUID groupId) {
+        MyGroup group = this.groupRepository.findById(groupId).get();
+        if(group.isVoteStarted()) {
+            return ResponseEntity.unprocessableEntity().body("voting already started");
+        }
+        RestTemplate restTemplate = new RestTemplate();
+        MyGroup.BoundingBox bbox = group.calcBoundingBox();
+
+        List<MediaType> types = Arrays.asList(
+                new MediaType("text", "json", DEFAULT_CHARSET),
+                new MediaType("application", "json", DEFAULT_CHARSET),
+                new MediaType("application", "*+json", DEFAULT_CHARSET));
+        GsonHttpMessageConverter gsonHttpMessageConverter = new GsonHttpMessageConverter();
+        gsonHttpMessageConverter.setSupportedMediaTypes(types);
+        List<HttpMessageConverter<?>> myMessageConverterList = new ArrayList<>();
+        myMessageConverterList.add(gsonHttpMessageConverter);
+        restTemplate.setMessageConverters(myMessageConverterList);
+        OscarItem[] items = restTemplate.getForObject("https://oscardev.fmi.uni-stuttgart.de/oscar/items/all?q=@amenity:restaurant+$geo:9.168434143066408,48.76976735954908,9.18663024902344,48.7794964290288", OscarItem[].class);
+        for(OscarItem item : items) {
+            Restaurant restaurant = new Restaurant();
+            for(int i = 0; i < item.getK().length; i++) {
+                if(item.getK()[i].equals("name")) {
+                    restaurant.setName(item.getV()[i]);
+                }
+                if(item.getK()[i].equals("cuisine")) {
+                    restaurant.setCuisineType(item.getV()[i]);
+                }
+            }
+            group.addRestaurant(restaurant);
+        }
+        group.setVoteStarted(true);
+        groupRepository.save(group);
+        return ResponseEntity.ok().build();
     }
 }

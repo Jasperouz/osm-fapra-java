@@ -51,6 +51,7 @@ public class MyGroup {
     @OneToMany
     private List<User> users = new ArrayList<>();
     private ArrayList<Restaurant> currentRestaurants = new ArrayList<>();
+    private boolean voteStarted = false;
 
     MyGroup() { }
 
@@ -62,12 +63,16 @@ public class MyGroup {
         this.users = users;
     }
 
-    public ArrayList<Restaurant> getCurrentRestaurants() {
+    public List<Restaurant> getCurrentRestaurants() {
         return currentRestaurants;
     }
 
     public void setCurrentRestaurants(ArrayList<Restaurant> currentRestaurants) {
         this.currentRestaurants = currentRestaurants;
+    }
+
+    public void addRestaurant(Restaurant restaurant) {
+        this.currentRestaurants.add(restaurant);
     }
 
     public void addUser(User user) {
@@ -88,6 +93,14 @@ public class MyGroup {
 
     public void setCreatorId(UUID creatorId) {
         this.creatorId = creatorId;
+    }
+
+    public boolean isVoteStarted() {
+        return voteStarted;
+    }
+
+    public void setVoteStarted(boolean voteStarted) {
+        this.voteStarted = voteStarted;
     }
 
     public BoundingBox calcBoundingBox() {
