@@ -1,12 +1,7 @@
 package de.unistuttgart.fmi.osmfaprajava;
 
-import net.bytebuddy.asm.Advice;
-
 import javax.persistence.*;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 public class MyGroup {
@@ -50,10 +45,25 @@ public class MyGroup {
     private UUID creatorId;
     @OneToMany
     private List<User> users = new ArrayList<>();
-    private ArrayList<Restaurant> currentRestaurants = new ArrayList<>();
+    @OneToMany
+    private Set<Restaurant> restaurants = new HashSet<>();
     private boolean voteStarted = false;
+    private boolean voteEnded = false;
+    @OneToOne
+    private Restaurant bestRestaurant;
+    @Transient
+    private int usersVoted = 0;
 
     MyGroup() { }
+
+
+    public int getUsersVoted() {
+        return usersVoted;
+    }
+
+    public void setUsersVoted(int usersVoted) {
+        this.usersVoted = usersVoted;
+    }
 
     public List<User> getUsers() {
         return users;
@@ -63,16 +73,16 @@ public class MyGroup {
         this.users = users;
     }
 
-    public List<Restaurant> getCurrentRestaurants() {
-        return currentRestaurants;
+    public Set<Restaurant> getRestaurants() {
+        return restaurants;
     }
 
-    public void setCurrentRestaurants(ArrayList<Restaurant> currentRestaurants) {
-        this.currentRestaurants = currentRestaurants;
+    public void setRestaurants(Set<Restaurant> restaurants) {
+        this.restaurants = restaurants;
     }
 
     public void addRestaurant(Restaurant restaurant) {
-        this.currentRestaurants.add(restaurant);
+        this.restaurants.add(restaurant);
     }
 
     public void addUser(User user) {
@@ -101,6 +111,22 @@ public class MyGroup {
 
     public void setVoteStarted(boolean voteStarted) {
         this.voteStarted = voteStarted;
+    }
+
+    public boolean isVoteEnded() {
+        return voteEnded;
+    }
+
+    public void setVoteEnded(boolean voteEnded) {
+        this.voteEnded = voteEnded;
+    }
+
+    public Restaurant getBestRestaurant() {
+        return bestRestaurant;
+    }
+
+    public void setBestRestaurant(Restaurant bestRestaurant) {
+        this.bestRestaurant = bestRestaurant;
     }
 
     public BoundingBox calcBoundingBox() {
