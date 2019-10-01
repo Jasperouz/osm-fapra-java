@@ -53,9 +53,19 @@ public class MyGroup {
     private Restaurant bestRestaurant;
     @Transient
     private int usersVoted = 0;
+    @Transient
+    private String creatorName;
+
 
     MyGroup() { }
 
+    public String getCreatorName() {
+        return creatorName;
+    }
+
+    public void setCreatorName(String creatorName) {
+        this.creatorName = creatorName;
+    }
 
     public int getUsersVoted() {
         return usersVoted;
